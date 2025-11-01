@@ -29,7 +29,7 @@ export async function processQuiz(
   setRunning("ocr");
   try {
     setOcrText("⏳ Running OCR…");
-    const r = await fetch(`http://localhost:5000/process-quiz/${quizId}?engine=${engine}`, { method: "POST" });
+    const r = await fetch(`https://ai-grader-backend-rowf.onrender.com/process-quiz/${quizId}?engine=${engine}`, { method: "POST" });
     const j = await r.json();
     if (j.success) { setOcrText("✅ OCR completed"); await refetch(); }
     else setOcrText(`❌ OCR failed: ${j.error}`);
@@ -58,7 +58,7 @@ export async function analyzeQuiz(
   try {
     setGradingResult("🧠 Grading in progress…");
     setPackLinks(null);
-    const r = await fetch(`http://localhost:5000/analyze-quiz/${quizId}`, {
+    const r = await fetch(`https://ai-grader-backend-rowf.onrender.com/analyze-quiz/${quizId}`, {
       method: "POST",
       headers: { "Content-Type": "application/json" },
       body: JSON.stringify({
@@ -71,16 +71,26 @@ export async function analyzeQuiz(
       }),
     });
 
+    // Read the body even on errors so 500s show a message
+    let raw = "";
+    try { raw = await r.text(); } catch {}
+    let j: any = {};
+    try { j = raw ? JSON.parse(raw) : {}; } catch {}
+
     if (r.status === 409) {
-      const j = await r.json();
-      setGradingResult(`⚠️ ${j.error} Try refreshing or wait for the current run to finish.`);
+      setGradingResult(`⚠️ ${j.error || "Another grading run is in progress."} Try refreshing or wait for the current run to finish.`);
       await refetch();
       return;
     }
 
-    const j = await r.json();
+    if (!r.ok) {
+      setGradingResult(`❌ Server ${r.status}: ${j.error || raw || "Unknown error"}`);
+      await refetch();
+      return;
+    }
+
     if (j.success) { setGradingResult(j.graded); await refetch(); }
-    else setGradingResult(`❌ Grading failed: ${j.error}`);
+    else setGradingResult(`❌ Grading failed: ${j.error || "Unknown error"}`);
   } catch (e: any) {
     setGradingResult(`❌ Error: ${e.message}`);
   }
@@ -130,7 +140,7 @@ export async function exportCsv(
   quizzes: Quiz[],
   refetch: () => Promise<void>
 ) {
-  const r = await fetch(`http://localhost:5000/export-csv/${quizId}`, { method: "POST" });
+  const r = await fetch(`https://ai-grader-backend-rowf.onrender.com/export-csv/${quizId}`, { method: "POST" });
   const j = await r.json();
   if (j.success) {
     await refetch();
@@ -171,7 +181,7 @@ export async function buildPack(
   setPackLinks: (v: Record<string, string> | null) => void,
   downloadGreenResults: (quizId: string) => Promise<void>
 ) {
-  const r = await fetch(`http://localhost:5000/build-graded-pack/${quizId}`, { method: "POST" });
+  const r = await fetch(`https://ai-grader-backend-rowf.onrender.com/build-graded-pack/${quizId}`, { method: "POST" });
   const j = await r.json();
   if (j.success) {
     setPackLinks(j);
@@ -187,7 +197,7 @@ export async function downloadGreenResults(
   quizzes: Quiz[]
 ) {
   try {
-    const r = await fetch(`http://localhost:5000/build-green-graded/${quizId}`, { method: "POST" });
+    const r = await fetch(`https://ai-grader-backend-rowf.onrender.com/build-green-graded/${quizId}`, { method: "POST" });
     const j = await r.json();
     if (!j.success || !j.url) {
       alert(`Failed to build green PDF: ${j.error || "Unknown error"}`);
@@ -217,7 +227,7 @@ export async function downloadSBAW(
 ) {
   try {
     const desiredName = `${baseNameFor(quizId, quizzes)}_SBAW.pdf`;
-    let r = await fetch(`http://localhost:5000/build-sbab/${quizId}`, { method: "POST" });
+    let r = await fetch(`https://ai-grader-backend-rowf.onrender.com/build-sbab/${quizId}`, { method: "POST" });
     let contentType = r.headers.get("content-type") || "";
     let j: any = null;
 
@@ -241,7 +251,7 @@ export async function downloadSBAW(
     }
 
     // fallback to /build-sbaw
-    r = await fetch(`http://localhost:5000/build-sbaw/${quizId}`, { method: "POST" });
+    r = await fetch(`https://ai-grader-backend-rowf.onrender.com/build-sbaw/${quizId}`, { method: "POST" });
     contentType = r.headers.get("content-type") || "";
     j = null;
 

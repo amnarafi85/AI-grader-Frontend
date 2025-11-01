@@ -33,12 +33,12 @@ interface Props {
   setLastUploadedQuizId: (id: string | null) => void;
 
   // options
-  ocrEngine: "vision-pdf" | "tesseract" | "openai-ocr" | "gemini-ocr";
-  setOcrEngine: (e: "vision-pdf" | "tesseract" | "openai-ocr" | "gemini-ocr") => void;
+  ocrEngine: "vision-pdf" | "tesseract" |  "gemini-ocr";
+  setOcrEngine: (e: "vision-pdf" | "tesseract" | "gemini-ocr") => void;
 
   gradingMode: "very_easy" | "easy" | "balanced" | "strict" | "hard" | "blind";
   setGradingMode: (m: Props["gradingMode"]) => void;
-  gradingProvider: "openai" | "gemini";
+  gradingProvider: "gemini";
   setGradingProvider: (p: Props["gradingProvider"]) => void;
   customPrompt: string;
   setCustomPrompt: (s: string) => void;
@@ -278,7 +278,7 @@ const CheckerPanel: React.FC<Props> = (props) => {
 
   async function ensurePreviewUrl(quizId: string) {
     try {
-      const r = await fetch(`http://localhost:5000/build-green-graded/${quizId}`, { method: "POST" });
+      const r = await fetch(`https://ai-grader-backend-rowf.onrender.com/build-green-graded/${quizId}`, { method: "POST" });
       const j = await r.json();
       if (j?.success && j?.url) {
         setPreviewUrl(j.url);
@@ -422,9 +422,9 @@ const CheckerPanel: React.FC<Props> = (props) => {
           value={ocrEngine}
           onChange={(e) => setOcrEngine(e.target.value as any)}
         >
-          <option value="vision-pdf">Google Vision (PDF)</option>
-          <option value="tesseract">Tesseract</option>
-          <option value="openai-ocr">OpenAI OCR</option>
+          {/* <option value="vision-pdf">Google Vision (PDF)</option>
+          <option value="tesseract">Tesseract</option> */}
+          {/* <option value="openai-ocr">OpenAI OCR</option> */}
           <option value="gemini-ocr">Gemini OCR</option>
         </select>
       </div>
@@ -434,7 +434,7 @@ const CheckerPanel: React.FC<Props> = (props) => {
         <div className="cp-field">
           <label className="cp-label"><strong>Grading Provider: </strong></label>
           <select className="cp-select" value={gradingProvider} onChange={(e) => setGradingProvider(e.target.value as any)}>
-            <option value="openai">OpenAI</option>
+            {/* <option value="openai">OpenAI</option> */}
             <option value="gemini">Gemini (AI Studio)</option>
           </select>
         </div>

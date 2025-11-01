@@ -546,7 +546,7 @@ const ResultsPanel: React.FC<Props> = (props) => {
                     <div className="gc-field">
                       <label className="rp-label">Grading Provider</label>
                       <select className="rp-select" value={gradingProvider} onChange={(e) => setGradingProvider(e.target.value as any)}>
-                        <option value="openai">OpenAI</option>
+                        {/* <option value="openai">OpenAI</option> */}
                         <option value="gemini">Gemini (AI Studio)</option>
                       </select>
                     </div>
