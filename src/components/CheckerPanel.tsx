@@ -315,6 +315,13 @@ const CheckerPanel: React.FC<Props> = (props) => {
     );
   };
 
+  // ---- minimal guard so engine sent to backend is always valid (defaults to gemini-ocr) ----
+  const safeOcrEngine = useMemo<"vision-pdf" | "tesseract" | "gemini-ocr">(() => {
+    return ocrEngine === "vision-pdf" || ocrEngine === "tesseract" || ocrEngine === "gemini-ocr"
+      ? ocrEngine
+      : "gemini-ocr";
+  }, [ocrEngine]);
+
   return (
     <div className="panel">
       <h2>Upload & Check New Quiz</h2>
@@ -523,7 +530,7 @@ const CheckerPanel: React.FC<Props> = (props) => {
             className="btn btn-dark"
             onClick={() => {
               setFlow("ocr");
-              processQuiz(lastUploadedQuizId, ocrEngine, setRunning, setOcrText, refetch);
+              processQuiz(lastUploadedQuizId, safeOcrEngine, setRunning, setOcrText, refetch);
             }}
             disabled={running !== "none"}
           >
@@ -537,7 +544,7 @@ const CheckerPanel: React.FC<Props> = (props) => {
               processAndGrade(
                 lastUploadedQuizId,
                 {
-                  engine: ocrEngine,
+                  engine: safeOcrEngine,
                   gradingMode,
                   gradingProvider,
                   customPrompt,
