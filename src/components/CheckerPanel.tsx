@@ -33,12 +33,12 @@ interface Props {
   setLastUploadedQuizId: (id: string | null) => void;
 
   // options
-  ocrEngine: "vision-pdf" | "tesseract" |  "gemini-ocr";
-  setOcrEngine: (e: "vision-pdf" | "tesseract" | "gemini-ocr") => void;
+  ocrEngine: "vision-pdf" | "tesseract" | "openai-ocr" | "gemini-ocr";
+  setOcrEngine: (e: "vision-pdf" | "tesseract" | "openai-ocr" | "gemini-ocr") => void;
 
   gradingMode: "very_easy" | "easy" | "balanced" | "strict" | "hard" | "blind";
   setGradingMode: (m: Props["gradingMode"]) => void;
-  gradingProvider: "gemini";
+  gradingProvider: "openai" | "gemini";
   setGradingProvider: (p: Props["gradingProvider"]) => void;
   customPrompt: string;
   setCustomPrompt: (s: string) => void;
@@ -315,13 +315,6 @@ const CheckerPanel: React.FC<Props> = (props) => {
     );
   };
 
-  // ---- minimal guard so engine sent to backend is always valid (defaults to gemini-ocr) ----
-  const safeOcrEngine = useMemo<"vision-pdf" | "tesseract" | "gemini-ocr">(() => {
-    return ocrEngine === "vision-pdf" || ocrEngine === "tesseract" || ocrEngine === "gemini-ocr"
-      ? ocrEngine
-      : "gemini-ocr";
-  }, [ocrEngine]);
-
   return (
     <div className="panel">
       <h2>Upload & Check New Quiz</h2>
@@ -429,9 +422,9 @@ const CheckerPanel: React.FC<Props> = (props) => {
           value={ocrEngine}
           onChange={(e) => setOcrEngine(e.target.value as any)}
         >
-          {/* <option value="vision-pdf">Google Vision (PDF)</option>
-          <option value="tesseract">Tesseract</option> */}
-          {/* <option value="openai-ocr">OpenAI OCR</option> */}
+          <option value="vision-pdf">Google Vision (PDF)</option>
+          <option value="tesseract">Tesseract</option>
+          <option value="openai-ocr">OpenAI OCR</option>
           <option value="gemini-ocr">Gemini OCR</option>
         </select>
       </div>
@@ -441,7 +434,7 @@ const CheckerPanel: React.FC<Props> = (props) => {
         <div className="cp-field">
           <label className="cp-label"><strong>Grading Provider: </strong></label>
           <select className="cp-select" value={gradingProvider} onChange={(e) => setGradingProvider(e.target.value as any)}>
-            {/* <option value="openai">OpenAI</option> */}
+            <option value="openai">OpenAI</option>
             <option value="gemini">Gemini (AI Studio)</option>
           </select>
         </div>
@@ -530,7 +523,7 @@ const CheckerPanel: React.FC<Props> = (props) => {
             className="btn btn-dark"
             onClick={() => {
               setFlow("ocr");
-              processQuiz(lastUploadedQuizId, safeOcrEngine, setRunning, setOcrText, refetch);
+              processQuiz(lastUploadedQuizId, ocrEngine, setRunning, setOcrText, refetch);
             }}
             disabled={running !== "none"}
           >
@@ -544,7 +537,7 @@ const CheckerPanel: React.FC<Props> = (props) => {
               processAndGrade(
                 lastUploadedQuizId,
                 {
-                  engine: safeOcrEngine,
+                  engine: ocrEngine,
                   gradingMode,
                   gradingProvider,
                   customPrompt,
