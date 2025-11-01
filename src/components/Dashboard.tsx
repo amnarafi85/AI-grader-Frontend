@@ -31,7 +31,7 @@ export default function Dashboard({ teacherId }: DashboardProps) {
   const [leniency, setLeniency] = useState<Leniency>("exact_only");
   const [useSolutionKey, setUseSolutionKey] = useState<boolean>(false);
 
-  const [ocrEngine, setOcrEngine] = useState<"vision-pdf" | "tesseract" | "gemini-ocr">("vision-pdf");
+  const [ocrEngine, setOcrEngine] = useState<"vision-pdf" | "tesseract" | "gemini-ocr">("gemini-ocr");
 
   const [lastUploadedQuizId, setLastUploadedQuizId] = useState<string | null>(null);
   const [running, setRunning] = useState<"none" | "ocr" | "ocr+grade">("none");
